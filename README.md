@@ -17,12 +17,13 @@ Tất cả giao tiếp từ máy người dùng lên máy chủ đều thông qu
 
 ## 2. Hướng dẫn cài đặt
 
-Bước 1: Cài đặt các thư viện phụ thuộc của Node.js.
+**Lưu ý:** Nếu không thay đổi logic mạch ZK, chỉ cần cài đặt các thư viện phụ thuộc của Node.js.
 ```bash
 npm install
-```
+``` 
 
-Bước 2: Biên dịch mạch Circom và tạo các khóa mật mã học (quá trình Trusted Setup). Bạn chỉ cần chạy lệnh này một lần duy nhất.
+**TRƯỜNG HỢP MUỐN XÂY DỰNG MẠCH ZK MỚI:** Biên dịch mạch Circom và tạo các khóa mật mã học (quá trình Trusted Setup).
+
 ```bash
 bash scripts/setup.sh
 ```
