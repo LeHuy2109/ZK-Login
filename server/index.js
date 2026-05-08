@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set up multer for file uploads (in-memory parsing)
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, limits: { fileSize: 2 * 1024 * 1024 } });
 
 // In-memory databases
 const users = {}; // { [username]: { passwordHash: string } }
