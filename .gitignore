@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+package-lock.json
+
+# ZK Proofs & Cấu hình tạm
+register_data.json
+login_proof.json
+
+# Đóng gói phần mềm (pkg)
+client_program/
+
+# Tệp sinh ra từ quá trình biên dịch mạch Circom (Artifacts)
+circuit/**/*.r1cs
+circuit/**/*.sym
+circuit/**/*_js/*.js
+
+# Các file sinh ra trong quá trình Trusted Setup (Phase 1 & Phase 2)
+keys/*.ptau
+keys/*_0000.zkey
+
+# (Lưu ý: Không ignore file keys/login_final.zkey và keys/verification_key.json 
+# vì kích thước chúng khá nhỏ và rất cần thiết để chạy dự án ngay lập tức)
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+# Technical Documents
+TECHNICAL.md
