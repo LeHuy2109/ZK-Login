@@ -1,10 +1,11 @@
 'use strict';
 
 const { buildPoseidon } = require('circomlibjs');
-const snarkjs           = require('snarkjs');
-const readline          = require('readline');
-const fs                = require('fs');
-const path              = require('path');
+const snarkjs = require('snarkjs');
+const readline = require('readline');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 const WASM_PATH_DEV = path.join(__dirname, '..', 'circuit', 'login_with_challenge_js', 'login_with_challenge.wasm');
 const ZKEY_PATH_DEV = path.join(__dirname, '..', 'keys', 'login_final.zkey');
@@ -17,7 +18,7 @@ const ZKEY_PATH = fs.existsSync(ZKEY_PATH_DEV) ? ZKEY_PATH_DEV : ZKEY_PATH_PROD;
 
 function prompt(question) {
     const rl = readline.createInterface({
-        input:  process.stdin,
+        input: process.stdin,
         output: process.stdout,
     });
     return new Promise(resolve => {
@@ -26,6 +27,14 @@ function prompt(question) {
             resolve(answer.trim());
         });
     });
+}
+
+function preparePasswordForZK(password) {
+    // 1. Băm mật khẩu bằng thuật toán chuẩn (SHA-256)
+    const hashHex = crypto.createHash('sha256').update(password).digest('hex');
+    // 2. Trích xuất 62 ký tự hex (248 bit) để đảm bảo KHÔNG vượt quá giới hạn trường BN128 (~254 bit)
+    const safeHex = hashHex.slice(0, 62);
+    return BigInt('0x' + safeHex);
 }
 
 async function register() {
@@ -39,7 +48,7 @@ async function register() {
     }
 
     const poseidon = await buildPoseidon();
-    const passwordBigInt = BigInt('0x' + Buffer.from(password, 'utf8').toString('hex'));
+    const passwordBigInt = preparePasswordForZK(password);
     const hashBytes = poseidon([passwordBigInt]);
     const passwordHash = poseidon.F.toString(hashBytes);
 
@@ -68,7 +77,7 @@ async function login() {
     }
 
     const poseidon = await buildPoseidon();
-    const passwordBigInt = BigInt('0x' + Buffer.from(password, 'utf8').toString('hex'));
+    const passwordBigInt = preparePasswordForZK(password);
     const hashBytes = poseidon([passwordBigInt]);
     const expectedHash = poseidon.F.toString(hashBytes);
 
@@ -94,24 +103,21 @@ async function login() {
 }
 
 async function main() {
-    console.log('=================================');
-    console.log('     ZK-LOGIN PROOVER CLI        ');
-    console.log('=================================');
     console.log('1. Đăng ký (Tạo file hash)');
     console.log('2. Đăng nhập (Tạo file proof)');
     console.log('0. Thoát');
-    console.log('=================================');
-
-    const choice = await prompt('Chọn thao tác (0-2): ');
-
-    if (choice === '1') {
-        await register();
-    } else if (choice === '2') {
-        await login();
-    } else if (choice === '0') {
-        console.log('Tạm biệt!');
-    } else {
-        console.log('Lựa chọn không hợp lệ.');
+    while (true) {
+        const choice = await prompt('Choose action (0-2): ');
+        if (choice === '1') {
+            await register();
+        } else if (choice === '2') {
+            await login();
+        } else if (choice === '0') {
+            console.log('Bye!');
+            break;
+        } else {
+            console.log('Error!');
+        }
     }
 
     // Dừng màn hình lại để người dùng đọc thông báo (tránh cửa sổ .exe tự đóng)
